@@ -1,30 +1,27 @@
-FROM ubuntu:latest
+FROM python:3.7-slim as cloudmapper
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-
-ENV ALKS_SERVER='https://alks.coxautoinc.com/rest'
-ENV ALKS_USERID='jleopold'
+LABEL maintainer="https://github.com/0xdabbad00/"
+LABEL Project="https://github.com/duo-labs/cloudmapper"
+ADD VERSION .
 
 EXPOSE 8000
+WORKDIR /opt/cloudmapper
 
-RUN apt-get update && \
-  apt-get -y install git autoconf automake libtool python3.7-dev python3-tk jq awscli python3-pip curl && \
-  curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+ENV ALKS_SERVER='https://alks.coxautoinc.com/rest'
+#ENV ALKS_USERID='jleopold'
+
+RUN apt-get update -y
+RUN apt-get -y install build-essential git autoconf automake libtool python3.7-dev python3-tk jq awscli python3-pip curl 
+RUN apt-get install -y bash
+
+# Install ALKS CLI
+RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
   apt-get -y install nodejs && \
-  npm install -g alks && \
-  git clone https://github.com/duo-labs/cloudmapper.git && \
-  cd cloudmapper/ && \
-  python3 -m pip install --user pipenv && \
-  ~/.local/bin/pipenv install --deploy --skip-lock
+  npm install -g alks
 
-WORKDIR cloudmapper
-#COPY scripts/* scripts/
-
-#CMD ~/.local/bin/pipenv run bashdock
-#CMD ~/.local/bin/pipenv shell
-#CMD ~/.local/bin/pipenv run ./scripts/alks_generate_config_file.pl
+RUN git clone https://github.com/duo-labs/cloudmapper.git /opt/cloudmapper
+RUN pip install pipenv
+RUN pipenv install --skip-lock
 #RUN pipenv shell
 
 RUN bash

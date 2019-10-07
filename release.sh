@@ -6,7 +6,7 @@ IMAGE=cloudmapper
 git pull
 
 # bump version
-docker run --rm -v "$PWD":/app jamesleopold/cloudmapper patch
+docker run --rm -v "$PWD":/app treeder/bump patch
 version=`cat VERSION`
 echo "version: $version"
 

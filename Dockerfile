@@ -7,9 +7,6 @@ ADD VERSION .
 EXPOSE 8000
 WORKDIR /opt/cloudmapper
 
-ENV ALKS_SERVER='https://alks.coxautoinc.com/rest'
-#ENV ALKS_USERID='jleopold'
-
 RUN apt-get update -y
 RUN apt-get -y install build-essential git autoconf automake libtool python3.7-dev python3-tk jq awscli python3-pip curl 
 RUN apt-get install -y bash

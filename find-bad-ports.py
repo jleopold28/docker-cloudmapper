@@ -79,7 +79,6 @@ account_name    = os.getenv('ACCOUNT')
 filename_in     = account_name + '.json'
 aws_region      = os.getenv('REGION')
 service_key     = os.getenv('PD_SERVICE_KEY')
-datadog_api_key = os.getenv('DATADOG_API_KEY')
 
 # Setup Pagerduty
 pd_url = 'https://events.pagerduty.com/generic/2010-04-15/create_event.json'

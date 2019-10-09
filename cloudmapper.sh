@@ -28,15 +28,18 @@ cat $ACCOUNT.json
 echo "$ACCOUNT.csv: "
 cat $ACCOUNT.csv
 
-# echo "Report.html: "
+echo "Report.html: "
 # send to sns email?
-# cat web/account-data/report.html
-
-# Alert pagerduty on critical
-#$PD_SERVICE_KEY
-# Alert pagerduty on warning
+cat web/account-data/report.html
 
 echo "done!"
 
-# Send $runtime to cloudmapper.runtime 
-#$DATADOG_API_KEY
+# Send success to datadog for monitoring
+curl  -X POST -H "Content-type: application/json" \
+-d "{
+      \"title\": \"Cloudmapper Success\",
+      \"text\": \"Cloudmapper run was successful for $ACCOUNT in $REGION\",
+      \"priority\": \"normal\",
+      \"alert_type\": \"success\"
+}" \
+"https://api.datadoghq.com/api/v1/events?api_key=$DATADOG_API_KEY"

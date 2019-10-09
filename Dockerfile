@@ -11,6 +11,10 @@ RUN apt-get -y install build-essential git autoconf automake libtool python3.7-d
 RUN apt-get install -y bash
 
 RUN git clone https://github.com/duo-labs/cloudmapper.git /opt/cloudmapper
+
+COPY cloudmapper.sh /opt/cloudmapper
+COPY find-bad-ports.py /opt/cloudmapper
+
 RUN pip install pipenv
 RUN pipenv install --skip-lock
 #RUN pipenv shell

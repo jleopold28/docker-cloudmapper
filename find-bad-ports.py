@@ -77,17 +77,13 @@ def send_event(pd_url, service_key, payload):
 # Set variables from env
 account_name    = os.getenv('ACCOUNT')
 filename_in     = account_name + '.json'
-aws_region      = os.getenv('REGION')
 service_key     = os.getenv('PD_SERVICE_KEY')
 
 # Setup Pagerduty
 pd_url = 'https://events.pagerduty.com/generic/2010-04-15/create_event.json'
-incident_key = 'cloudmapper-' + account_name + '-' + aws_region
+incident_key = 'cloudmapper-' + account_name
 event_data = {
     'incident_key': incident_key,
-    'details': {
-        'region': aws_region
-    },
     'client': 'cloudmapper'
 }
 
@@ -120,9 +116,15 @@ with sys.stdin as data:
             if bad_ports:
                 print("%s\t%s\t%s\t%s\t%s" % (account,aws_type,hostname,bad_ports.encode("ascii"),arn))
                 event_data['event_type'] = 'trigger'
-                event_data['description'] = 'cloudmapper in ' + account_name + ' ' + aws_region
+                event_data['description'] = 'cloudmapper in ' + account_name
                 event_data['description'] += ' had the following publicly accesible ports:' \
                     "%s\t%s\t%s\t%s\t%s" % (account,aws_type,hostname,bad_ports.encode("ascii"),arn)
-                send_event(pd_url, service_key, event_data)
+            else:
+                event_data['event_type'] = 'resolve'
+                event_data['description'] = 'cloudmapper in ' + account_name
+                event_data['description'] += ' had no publicly accesible ports'
+            
+            send_event(pd_url, service_key, event_data)
+
 
 

@@ -38,7 +38,7 @@ echo "done!"
 curl  -X POST -H "Content-type: application/json" \
 -d "{
       \"title\": \"Cloudmapper Success\",
-      \"text\": \"Cloudmapper run was successful for $ACCOUNT in $REGION\",
+      \"text\": \"Cloudmapper run was successful for $ACCOUNT\",
       \"priority\": \"normal\",
       \"alert_type\": \"success\"
 }" \

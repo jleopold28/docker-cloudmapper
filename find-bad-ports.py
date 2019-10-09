@@ -12,10 +12,10 @@ from pandas.io.json import json_normalize
 
 logger = logging.getLogger(__name__)
 
-def get_bad_ports(ports):
+def get_bad_ports(ports, ok_ports):
     # 943 = tuckernet 
     # 1194 = tuckernet udp
-    ok_ports = ['80','443','8080','943','1194']
+    #ok_ports = ['80','443','8080','943','1194']
     bad_ports = []
     for port in ports:
         if port not in ok_ports:
@@ -78,6 +78,7 @@ def send_event(pd_url, service_key, payload):
 account_name    = os.getenv('ACCOUNT')
 filename_in     = account_name + '.json'
 service_key     = os.getenv('PD_SERVICE_KEY')
+ok_ports        = list(os.getenv('OK_PORTS').split(","))
 
 # Setup Pagerduty
 pd_url = 'https://events.pagerduty.com/generic/2010-04-15/create_event.json'
@@ -109,7 +110,7 @@ with sys.stdin as data:
         
             ports = port_list.split(',')
         
-            bad_ports = get_bad_ports(ports)
+            bad_ports = get_bad_ports(ports, ok_ports)
             bad_ports = test_each_port(hostname,bad_ports)
             bad_ports = ",".join(bad_ports)
         

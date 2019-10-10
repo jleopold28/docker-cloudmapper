@@ -14,6 +14,7 @@ RUN git clone https://github.com/duo-labs/cloudmapper.git /opt/cloudmapper
 
 RUN mkdir /opt/cloudmapper/port_check
 COPY files/* /opt/cloudmapper/
+COPY files/port_check/ /opt/cloudmapper/port_check/
 RUN chmod +x /opt/cloudmapper/cloudmapper.sh
 
 #RUN mkdir /opt/cloudmapper/port_check

@@ -20,19 +20,14 @@ echo "Running cloudmapper.py public scan on $ACCOUNT"
 pipenv run python cloudmapper.py public --account $ACCOUNT > $ACCOUNT.json
 
 echo "Running check on bad ports for $ACCOUNT"
-pipenv run python find-bad-ports.py
+pipenv run python /opt/cloudmapper/port_check/run_port_check.py
 
-echo "$ACCOUNT.json: "
-cat $ACCOUNT.json
 
-echo "$ACCOUNT.csv: "
-cat $ACCOUNT.csv
-
-echo "Report.html: "
+#echo "Report.html: "
 # send to sns email?
-cat web/account-data/report.html
+#cat web/account-data/report.html
 
-echo "done!"
+echo "Cloudmapper run was successful!"
 
 # Send success to datadog for monitoring
 curl  -X POST -H "Content-type: application/json" \

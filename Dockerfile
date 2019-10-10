@@ -12,9 +12,11 @@ RUN apt-get install -y bash
 
 RUN git clone https://github.com/duo-labs/cloudmapper.git /opt/cloudmapper
 
-COPY cloudmapper.sh /opt/cloudmapper
+COPY files/cloudmapper.sh /opt/cloudmapper
 RUN chmod +x /opt/cloudmapper/cloudmapper.sh
-COPY find-bad-ports.py /opt/cloudmapper
+
+RUN mkdir /opt/cloudmapper/port_check
+COPY files/port_check/* /opt/cloudmapper/port_check/
 
 RUN pip install pipenv
 RUN pipenv install --skip-lock

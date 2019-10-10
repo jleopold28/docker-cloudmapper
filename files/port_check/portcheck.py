@@ -96,7 +96,7 @@ class PortCheck():
             json_data = json.load(data)
             df = json_normalize(json_data)
             df = df[['account', 'type', 'hostname', 'ports', 'arn']]
-            #csv_data = df.to_csv(csv_filename,header=False, index=False)
+            df.to_csv(csv_filename,header=False,index=False)
 
             with open(csv_filename) as csv_file:
                 lines = csv.reader(csv_file, delimiter=',')

@@ -76,6 +76,7 @@ class PagerDutyV1():
         """
         d = {
             'incident_key': self._incident_key,
+            'details': {},
             'client': 'cloudmapper'
         }
         if self._account_name is not None:

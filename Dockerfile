@@ -7,7 +7,7 @@ EXPOSE 8000
 WORKDIR /opt/cloudmapper
 
 RUN apt-get update -y
-RUN apt-get -y install build-essential git autoconf automake libtool python3.7-dev python3-tk jq awscli python3-pip curl 
+RUN apt-get -y install build-essential git autoconf automake libtool python3.7-dev python3-tk jq awscli python3-pip curl netcat
 RUN apt-get install -y bash
 
 RUN git clone https://github.com/duo-labs/cloudmapper.git /opt/cloudmapper

@@ -22,10 +22,8 @@ pipenv run python cloudmapper.py public --account $ACCOUNT > $ACCOUNT.json
 echo "Running check on bad ports for $ACCOUNT"
 pipenv run python /opt/cloudmapper/run_port_check.py
 
-
-#echo "Report.html: "
-# send to sns email?
-#cat web/account-data/report.html
+echo "Sending email via SES for $ACCOUNT"
+pipenv run python /opt/cloudmapper/send_email.py
 
 echo "Cloudmapper run was successful!"
 

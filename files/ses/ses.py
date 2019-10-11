@@ -13,8 +13,7 @@ class SES():
     # Specify a configuration set. If you do not want to use a configuration
     # set, comment the following variable, and the 
     # ConfigurationSetName=CONFIGURATION_SET argument below.
-    CONFIGURATION_SET = "ConfigSet"
-
+    #CONFIGURATION_SET = "ConfigSet"
 
     def __init__(self, sender, recipient, region):
         """
@@ -75,8 +74,7 @@ class SES():
                 ],
                 RawMessage={
                     'Data':msg.as_string(),
-                },
-                ConfigurationSetName=self.CONFIGURATION_SET
+                }
             )
         # Display an error if something goes wrong.	
         except ClientError as e:

@@ -33,7 +33,7 @@ class PagerDutyV1():
         self._service_key = service_key
         
         if incident_key is None:
-            incident_key = 'cloudmapper-{account_name}'
+            incident_key = 'cloudmapper-' + account_name
         self._incident_key = incident_key
 
     def _send_event(self, service_key, payload):
@@ -117,6 +117,7 @@ class PagerDutyV1():
                                    ' %s' % exc.__repr__()
             data['details']['exception'] = exc.__repr__()
         else:
-            data['description'] += problem_str
+            data['description'] += 'had publicly accesible ports'
+            data['details']['hosts_with_ports'] = problem_str
         self._send_event(self._service_key, data)
      

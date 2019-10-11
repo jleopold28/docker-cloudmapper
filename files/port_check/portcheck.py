@@ -90,6 +90,8 @@ class PortCheck():
         """
         sys.stdin = open(self.filename_in, 'r')
 
+        problem_str = ''
+
         with sys.stdin as data:
             csv_filename = self.account_name + '.csv'
 
@@ -116,8 +118,9 @@ class PortCheck():
                 
                     if bad_ports:
                         print("%s\t%s\t%s\t%s\t%s" % (account,aws_type,hostname,bad_ports.encode("ascii"),arn))
-                        problem_str = ' had the following publicly accesible ports:' \
-                            "%s\t%s\t%s\t%s\t%s" % (account,aws_type,hostname,bad_ports.encode("ascii"),arn)
-                        self.pd.on_failure(problem_str)
-                    else:
-                        self.pd.on_success()
+                        problem_str += ("%s\t%s\t%s\t%s\t%s" % (account,aws_type,hostname,bad_ports.encode("ascii"),arn) + '\n')
+            
+        if problem_str == '':
+            self.pd.on_success()
+        else:
+            self.pd.on_failure(problem_str)

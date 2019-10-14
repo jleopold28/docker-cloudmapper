@@ -22,7 +22,7 @@ def send_email():
 
     with open('/opt/cloudmapper/' + account_name + '-audit.json') as json_file:
         audit_json = json.load(json_file)
-        build_direction = "LEFT_TO_RIGHT"
+        build_direction = "TOP_TO_BOTTOM"
         table_attributes = {"style": "width:100%"}
         audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
 

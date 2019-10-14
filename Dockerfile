@@ -24,6 +24,7 @@ RUN chmod +x /opt/cloudmapper/cloudmapper.sh
 #COPY files/port_check/* /opt/cloudmapper/port_check/
 
 RUN pip install pipenv
+RUN pip install json2table
 RUN pipenv install --skip-lock
 #RUN pipenv shell
 

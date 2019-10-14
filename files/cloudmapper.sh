@@ -13,8 +13,11 @@ cat config.json
 echo "Running cloudmapper.py collect on $ACCOUNT"
 pipenv run python cloudmapper.py collect --account $ACCOUNT
 
-echo "Running cloudmapper.py report on $ACCOUNT"
-pipenv run python cloudmapper.py report --account $ACCOUNT
+#echo "Running cloudmapper.py report on $ACCOUNT"
+#pipenv run python cloudmapper.py report --account $ACCOUNT
+
+echo "Running cloudmapper.py audit on $ACCOUNT"
+pipenv run python cloudmapper.py audit --account $ACCOUNT --json > $ACCOUNT-audit.json
 
 echo "Running cloudmapper.py public scan on $ACCOUNT"
 pipenv run python cloudmapper.py public --account $ACCOUNT > $ACCOUNT.json

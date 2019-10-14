@@ -14,7 +14,7 @@ def send_email():
     recipient       = 'AWS SES <' + os.getenv('SES_RECIPIENT') + '>'
     region          = os.getenv('AWS_REGION')
     ses = SES(sender, recipient, region)
-    subject = account_name + ' cloudmapper results'
+    subject = '[cloudmapper ' + account_name + '] Cloudmapper audit findings'
     body_text = "Please see the attached file for cloudmapper results."
     body_html = """\
 <html>
@@ -25,11 +25,8 @@ def send_email():
 </html>
 """
     attachments = ['/opt/cloudmapper/web/account-data/report.html',
-    '/opt/cloudmapper/web/css/bootstrap.css',
-    '/opt/cloudmapper/web/css/lato.css',
-    '/opt/cloudmapper/web/css/report.css',
-    '/opt/cloudmapper/web/js/chart.js',
-    '/opt/cloudmapper/web/js/report.js']
+    '/opt/cloudmapper/' + account_name + '-audit.json'
+    ]
 
     ses.send_email(subject, body_text, body_html, attachments)
 

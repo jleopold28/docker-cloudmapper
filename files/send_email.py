@@ -11,7 +11,7 @@ def send_email():
 
     account_name    = os.getenv('ACCOUNT')
     sender          = os.getenv('SES_SENDER')
-    recipient       = 'AWS SES ' + os.getenv('SES_RECIPIENT')
+    recipient       = 'AWS SES <' + os.getenv('SES_RECIPIENT') + '>'
     region          = os.getenv('AWS_REGION')
     ses = SES(sender, recipient, region)
     subject = "Cloudmapper results for " + account_name

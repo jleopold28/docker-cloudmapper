@@ -1,4 +1,6 @@
 import os
+import json
+import json2table
 from ses.ses import SES
 
 def send_email():
@@ -16,17 +18,24 @@ def send_email():
     ses = SES(sender, recipient, region)
     subject = '[cloudmapper ' + account_name + '] Cloudmapper audit findings'
     body_text = "Please see the attached file for cloudmapper results."
+
+    audit_json = json.loads('/opt/cloudmapper/' + account_name + '-audit.json')
+    build_direction = "LEFT_TO_RIGHT"
+    table_attributes = {"style": "width:100%"}
+    audit_table = json2table.convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
+    
     body_html = """\
 <html>
 <head></head>
 <body>
 <p>Please see the attached file for cloudmapper results.</p>
+"""
+    body_html += audit_table
+    body_html += """\
 </body>
 </html>
 """
-    attachments = ['/opt/cloudmapper/web/account-data/report.html',
-    '/opt/cloudmapper/' + account_name + '-audit.json'
-    ]
+    attachments = ['/opt/cloudmapper/web/account-data/report.html']
 
     ses.send_email(subject, body_text, body_html, attachments)
 

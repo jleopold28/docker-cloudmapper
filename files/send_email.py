@@ -1,6 +1,7 @@
 import os
 import json
 import json2table
+from json2table import convert
 from ses.ses import SES
 
 def send_email():
@@ -22,8 +23,8 @@ def send_email():
     audit_json = json.loads('/opt/cloudmapper/' + account_name + '-audit.json')
     build_direction = "LEFT_TO_RIGHT"
     table_attributes = {"style": "width:100%"}
-    audit_table = json2table.convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
-    
+    audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
+
     body_html = """\
 <html>
 <head></head>

@@ -20,10 +20,11 @@ def send_email():
     subject = '[cloudmapper ' + account_name + '] Cloudmapper audit findings'
     body_text = "Please see the attached file for cloudmapper results."
 
-    audit_json = json.loads('/opt/cloudmapper/' + account_name + '-audit.json')
-    build_direction = "LEFT_TO_RIGHT"
-    table_attributes = {"style": "width:100%"}
-    audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
+    with open('/opt/cloudmapper/' + account_name + '-audit.json') as json_file:
+        audit_json = json.load(json_file)
+        build_direction = "LEFT_TO_RIGHT"
+        table_attributes = {"style": "width:100%"}
+        audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
 
     body_html = """\
 <html>

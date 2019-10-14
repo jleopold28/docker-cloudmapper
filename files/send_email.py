@@ -14,20 +14,24 @@ def send_email():
     recipient       = 'AWS SES <' + os.getenv('SES_RECIPIENT') + '>'
     region          = os.getenv('AWS_REGION')
     ses = SES(sender, recipient, region)
-    subject = "Cloudmapper results for " + account_name
-    body_text = "Hello,\r\nPlease see the attached file for cloudmapper results."
+    subject = account_name + ' cloudmapper results'
+    body_text = "Please see the attached file for cloudmapper results."
     body_html = """\
 <html>
 <head></head>
 <body>
-<h1>Hello!</h1>
 <p>Please see the attached file for cloudmapper results.</p>
 </body>
 </html>
 """
-    attachment = '/opt/cloudmapper/web/account-data/report.html'
+    attachments = ['/opt/cloudmapper/web/account-data/report.html',
+    '/opt/cloudmapper/web/css/bootstrap.css',
+    '/opt/cloudmapper/web/css/lato.css',
+    '/opt/cloudmapper/web/css/report.css',
+    '/opt/cloudmapper/web/js/chart.js',
+    '/opt/cloudmapper/web/js/report.js']
 
-    ses.send_email(subject, body_text, body_html, attachment)
+    ses.send_email(subject, body_text, body_html, attachments)
 
 if __name__ == "__main__":
     send_email()

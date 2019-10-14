@@ -29,7 +29,7 @@ class SES():
         # Create a new SES resource
         self.client = boto3.client('ses',region_name=region)
 
-    def send_email(self, subject, body_text, body_html, attachment):
+    def send_email(self, subject, body_text, body_html, attachments):
         # Create a multipart/mixed parent container.
         msg = MIMEMultipart('mixed')
         # Add subject, from and to lines.
@@ -48,22 +48,21 @@ class SES():
         msg_body.attach(textpart)
         msg_body.attach(htmlpart)
 
-        # Define the attachment part and encode it using MIMEApplication.
-        att = MIMEApplication(open(attachment, 'rb').read())
+        for attachment in attachments:
+            # Define the attachment part and encode it using MIMEApplication.
+            att = MIMEApplication(open(attachment, 'rb').read())
 
-        # Add a header to tell the email client to treat this part as an attachment,
-        # and to give the attachment a name.
-        att.add_header('Content-Disposition','attachment',filename=os.path.basename(attachment))
+            # Add a header to tell the email client to treat this part as an attachment,
+            # and to give the attachment a name.
+            att.add_header('Content-Disposition','attachment',filename=os.path.basename(attachment))
 
-        # Attach the multipart/alternative child container to the multipart/mixed
-        # parent container.
-        msg.attach(msg_body)
+            # Attach the multipart/alternative child container to the multipart/mixed
+            # parent container.
+            msg.attach(msg_body)
 
-        # Add the attachment to the parent container.
-        msg.attach(att)
+            # Add the attachment to the parent container.
+            msg.attach(att)
 
-        # Add the attachment to the parent container.
-        msg.attach(att)
         #print(msg)
         try:
             #Provide the contents of the email.

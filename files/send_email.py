@@ -23,7 +23,7 @@ def send_email():
     with open('/opt/cloudmapper/' + account_name + '-audit.json') as json_file:
         audit_json = json.load(json_file)
         build_direction = "TOP_TO_BOTTOM"
-        table_attributes = {"style": "width:100%"}
+        table_attributes = {"style" : "width:100%", "class" : "table table-striped"}
         audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
 
     body_html = """\
@@ -31,10 +31,10 @@ def send_email():
 <head></head>
 <body>
 <p>Please see the attached file for cloudmapper results.</p>
+</body>
 """
     body_html += audit_table
     body_html += """\
-</body>
 </html>
 """
     attachments = ['/opt/cloudmapper/web/account-data/report.html']

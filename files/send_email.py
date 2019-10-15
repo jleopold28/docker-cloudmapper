@@ -1,13 +1,11 @@
 import os
 import json
-
+import datetime
 import premailer
-from premailer import transform
-
 import re
 import shutil
 from tempfile import mkstemp
-
+from premailer import transform
 from ses.ses import SES
 
 def send_email():
@@ -26,12 +24,6 @@ def send_email():
     subject = '[cloudmapper ' + account_name + '] Cloudmapper audit findings'
     body_text = "Please see the attached file for cloudmapper results."
 
-    #with open('/opt/cloudmapper/' + account_name + '-audit.json') as json_file:
-    #    audit_json = json.load(json_file)
-    #    build_direction = "TOP_TO_BOTTOM"
-    #    table_attributes = {"style" : "width:100%", "class" : "table table-striped"}
-    #    audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
-
     body_html = """\
 <html>
 <head></head>
@@ -40,24 +32,17 @@ def send_email():
 </body>
 </html>
 """
-    #body_html += audit_table
-    #body_html += """\
-#</html>
-#"""
 
-    # Replace the script string
+    # Replace the js script source with raw github content
+    # Content is served via jsdelivr CDN (https://www.jsdelivr.com/)
+    # Raw github files do not have correct js headers
     sed('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', "/opt/cloudmapper/web/account-data/report.html")
     sed('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js',"/opt/cloudmapper/web/account-data/report.html")
-    #pysed.replace('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', '/opt/cloudmapper/web/account-data/report.html')
-    #pysed.replace('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js','/opt/cloudmapper/web/account-data/report.html')
 
-
-    f = open('/opt/cloudmapper/web/account-data/report.html', 'r')
-    new_content = transform(f.read(), base_path='/opt/cloudmapper/web/css')
-    o = open('/opt/cloudmapper/new_report.html', 'w+')
-    o.write(new_content)
-
-    attachments = ['/opt/cloudmapper/new_report.html']
+    # Run premailer transformation to inject CSS data directly in HTML
+    # https://pypi.org/project/premailer/
+    report_name = premailer_transform('/opt/cloudmapper/web/account-data/report.html')
+    attachments = [report_name]
 
     ses.send_email(subject, body_text, body_html, attachments)
 
@@ -95,6 +80,24 @@ def sed(pattern, replace, source, dest=None):
     if not dest:
         shutil.move(name, source)
 
+def premailer_transform(source):
+    """Runs premailer transformation on an html source file.
+    A new HTML file with CSS injections is created
+
+    Args:
+        source  (str): input filename
+    Returns:
+        output_file (str): name of newly generated html file
+    """
+    fin = open(source, 'r')
+    new_content = transform(fin.read(), base_path='/opt/cloudmapper/web/css')
+    now = datetime.datetime.now()
+    cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'
+    fout = open('/opt/cloudmapper/' + cloudmapper_filename, 'w+')
+    fout.write(new_content)
+    fin.close()
+    fout.close()
+    return cloudmapper_filename
 
 if __name__ == "__main__":
     send_email()

@@ -15,27 +15,25 @@ class SES():
     # ConfigurationSetName=CONFIGURATION_SET argument below.
     #CONFIGURATION_SET = "ConfigSet"
 
-    def __init__(self, sender, recipient, region):
+    def __init__(self, region):
         """
         Initialize the SES provider
 
-        :param X: fds
-        :type X: str
+        :param region: AWS region for SES
+        :type region: str
         """
-        self.sender = sender
-        self.recipient = recipient
         self.region = region
 
         # Create a new SES resource
         self.client = boto3.client('ses',region_name=region)
 
-    def send_email(self, subject, body_text, body_html, attachments):
+    def send_email(self, sender, recipient, subject, body_text, body_html, attachments):
         # Create a multipart/mixed parent container.
         msg = MIMEMultipart('mixed')
         # Add subject, from and to lines.
         msg['Subject'] = subject 
-        msg['From'] = self.sender 
-        msg['To'] = self.recipient
+        msg['From'] = sender
+        msg['To'] = recipient
 
         # Create a multipart/alternative child container.
         msg_body = MIMEMultipart('alternative')
@@ -67,9 +65,9 @@ class SES():
         try:
             #Provide the contents of the email.
             response = self.client.send_raw_email(
-                Source=self.sender,
+                Source=sender,
                 Destinations=[
-                    self.recipient
+                    recipient
                 ],
                 RawMessage={
                     'Data':msg.as_string(),

@@ -92,19 +92,6 @@ def premailer_transform(source):
     sed('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js', source)
     sed('../favicon.ico','https://raw.githubusercontent.com/duo-labs/cloudmapper/master/web/favicon.ico', source)
 
-    # Hack to fix Javascript Pop up Charts
-    # For some reason, premailer has a hard time evaluating the CSS on these JS componenets
-    additional_css = """
-.mytooltip:hover .tooltiptext {visibility:visible}
-#chartjs-tooltip td {background-color: #fff}
-#chartjs-tooltip table {box-shadow: 5px 10px 8px #888888}
-table {border-collapse:collapse;}
-table, td, th {border:1px solid black; padding: 1px;}
-th {background-color: #ddd; text-align: center;}
-    """
-
-    sed(".mytooltip:hover .tooltiptext {visibility:visible}", additional_css, source)
-
     fin = open(source, 'r')
     new_content = transform(fin.read(), base_path='/opt/cloudmapper/web/css')
     now = datetime.datetime.now()
@@ -113,6 +100,19 @@ th {background-color: #ddd; text-align: center;}
     fout.write(new_content)
     fin.close()
     fout.close()
+
+    # Hack to fix Javascript Pop up Chart backgrounds
+    # For some reason, premailer has a hard time evaluating the CSS on JS componenets
+    additional_css = """
+.mytooltip:hover .tooltiptext {visibility:visible}
+#chartjs-tooltip td {background-color: #fff}
+#chartjs-tooltip table {box-shadow: 5px 10px 8px #888888}
+table {border-collapse:collapse;}
+table, td, th {border:1px solid black; padding: 1px;}
+th {background-color: #ddd; text-align: center;}"""
+
+    sed('.mytooltip:hover .tooltiptext {visibility:visible}', additional_css, cloudmapper_filename)
+
     return cloudmapper_filename
 
 if __name__ == "__main__":

@@ -1,7 +1,11 @@
 import os
 import json
-import json2table
-from json2table import convert
+import pysed
+import premailer
+from premailer import transform
+#import json2table
+#from pysed import replace
+#from json2table import convert
 from ses.ses import SES
 
 def send_email():
@@ -20,11 +24,11 @@ def send_email():
     subject = '[cloudmapper ' + account_name + '] Cloudmapper audit findings'
     body_text = "Please see the attached file for cloudmapper results."
 
-    with open('/opt/cloudmapper/' + account_name + '-audit.json') as json_file:
-        audit_json = json.load(json_file)
-        build_direction = "TOP_TO_BOTTOM"
-        table_attributes = {"style" : "width:100%", "class" : "table table-striped"}
-        audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
+    #with open('/opt/cloudmapper/' + account_name + '-audit.json') as json_file:
+    #    audit_json = json.load(json_file)
+    #    build_direction = "TOP_TO_BOTTOM"
+    #    table_attributes = {"style" : "width:100%", "class" : "table table-striped"}
+    #    audit_table = convert(audit_json, build_direction=build_direction, table_attributes=table_attributes)
 
     body_html = """\
 <html>
@@ -32,12 +36,23 @@ def send_email():
 <body>
 <p>Please see the attached file for cloudmapper results.</p>
 </body>
-"""
-    body_html += audit_table
-    body_html += """\
 </html>
 """
-    attachments = ['/opt/cloudmapper/web/account-data/report.html']
+    #body_html += audit_table
+    #body_html += """\
+#</html>
+#"""
+    # Replace the script string
+    pysed.replace('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', '/opt/cloudmapper/web/account-data/report.html')
+    pysed.replace('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js','/opt/cloudmapper/web/account-data/report.html')
+
+
+    f = open('/opt/cloudmapper/web/account-data/report.html', 'r')
+    new_content = transform(f.read(), base_path='/opt/cloudmapper/web/css')
+    o = open('/opt/cloudmapper/new_report.html', 'w+')
+    o.write(new_content)
+
+    attachments = ['/opt/cloudmapper/new_report.html']
 
     ses.send_email(subject, body_text, body_html, attachments)
 

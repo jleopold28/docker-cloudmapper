@@ -24,7 +24,7 @@ RUN chmod +x /opt/cloudmapper/cloudmapper.sh
 #COPY files/port_check/* /opt/cloudmapper/port_check/
 
 RUN pip install pipenv
-RUN pipenv install pysed premailer --skip-lock
+RUN pipenv install premailer --skip-lock
 RUN pipenv install --skip-lock
 #RUN pipenv shell
 

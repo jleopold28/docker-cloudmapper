@@ -1,11 +1,13 @@
 import os
 import json
-import pysed
+
 import premailer
 from premailer import transform
-#import json2table
-#from pysed import replace
-#from json2table import convert
+
+import re
+import shutil
+from tempfile import mkstemp
+
 from ses.ses import SES
 
 def send_email():
@@ -42,9 +44,12 @@ def send_email():
     #body_html += """\
 #</html>
 #"""
+
     # Replace the script string
-    pysed.replace('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', '/opt/cloudmapper/web/account-data/report.html')
-    pysed.replace('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js','/opt/cloudmapper/web/account-data/report.html')
+    sed('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', "/opt/cloudmapper/web/account-data/report.html")
+    sed('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js',"/opt/cloudmapper/web/account-data/report.html")
+    #pysed.replace('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', '/opt/cloudmapper/web/account-data/report.html')
+    #pysed.replace('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js','/opt/cloudmapper/web/account-data/report.html')
 
 
     f = open('/opt/cloudmapper/web/account-data/report.html', 'r')
@@ -55,6 +60,41 @@ def send_email():
     attachments = ['/opt/cloudmapper/new_report.html']
 
     ses.send_email(subject, body_text, body_html, attachments)
+
+def sed(pattern, replace, source, dest=None):
+    """Reads a source file and writes the destination file.
+
+    In each line, replaces pattern with replace.
+
+    Args:
+        pattern (str): pattern to match (can be re.pattern)
+        replace (str): replacement str
+        source  (str): input filename
+        dest (str): destination filename, if not given, source will be over written.        
+    """
+
+    fin = open(source, 'r')
+    if dest:
+        fout = open(dest, 'w')
+    else:
+        fd, name = mkstemp()
+        fout = open(name, 'w')
+    
+    for line in fin:
+        out = re.sub(pattern, replace, line)
+        fout.write(out)
+
+    try:
+        fout.writelines(fin.readlines())
+    except Exception as E:
+        raise E
+
+    fin.close()
+    fout.close()
+
+    if not dest:
+        shutil.move(name, source)
+
 
 if __name__ == "__main__":
     send_email()

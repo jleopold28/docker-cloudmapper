@@ -20,12 +20,8 @@ COPY files/ses/ /opt/cloudmapper/ses/
 
 RUN chmod +x /opt/cloudmapper/cloudmapper.sh
 
-#RUN mkdir /opt/cloudmapper/port_check
-#COPY files/port_check/* /opt/cloudmapper/port_check/
-
 RUN pip install pipenv
 RUN pipenv install premailer --skip-lock
 RUN pipenv install --skip-lock
-#RUN pipenv shell
 
 RUN bash

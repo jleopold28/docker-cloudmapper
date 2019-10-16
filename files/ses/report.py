@@ -65,18 +65,21 @@ class Report():
 
         subject = '[cloudmapper ' + self.account_name + '] Cloudmapper audit findings'
         body_text = "Please see the attached file for cloudmapper results."
-        body_html = """\
-<html>
-<head></head>
-<body>
-<p>Please see the attached file for cloudmapper results.</p>
-</body>
-</html>
-"""
+        #body_html = """\
+#<html>
+#<head></head>
+#<body>
+#<p>Please see the attached file for cloudmapper results.</p>
+#</body>
+#</html>
+#"""
 
         # Run premailer transformation to inject CSS data directly in HTML
         # https://pypi.org/project/premailer/
         out_file = self.premailer_transform(self.report_source)
+
+        body_html = out_file
+        
         attachments = [out_file]
 
         self.ses.send_email(self.sender, self.recipient, subject, body_text, body_html, attachments)
@@ -94,18 +97,34 @@ class Report():
         # Replace the js script source with raw github content
         # Content is served via jsdelivr CDN (https://www.jsdelivr.com/)
         # Raw github files do not have correct js headers
-        self.sed('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', source)
-        self.sed('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js', source)
-        self.sed('../favicon.ico','https://raw.githubusercontent.com/duo-labs/cloudmapper/master/web/favicon.ico', source)
+        #self.sed('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', source)
+        #self.sed('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js', source)
+        #self.sed('../favicon.ico','https://raw.githubusercontent.com/duo-labs/cloudmapper/master/web/favicon.ico', source)
 
-        fin = open(source, 'r')
-        new_content = transform(fin.read(), base_path=self.BASE_PATH)
+        with open('/opt/cloudmapper/web/js/chart.js', 'r') as chart_js:
+            data = chart_js.read()
+            self.sed('<script src="../js/chart.js"></script>', '<script>' + data + '</script>', source)
+        
+        with open('/opt/cloudmapper/web/js/report.js', 'r') as report_js:
+            data = report_js.read()
+            self.sed('<script src="../js/report.js"></script>','<script>' + data + '</script>', source)
+
         now = datetime.datetime.now()
         cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'
-        fout = open('/opt/cloudmapper/' + cloudmapper_filename, 'w+')
-        fout.write(new_content)
-        fin.close()
-        fout.close()
+
+        with open(source, 'r') as fin, open('/opt/cloudmapper/' + cloudmapper_filename, 'w+') as fout:
+            data = fin.read()
+            new_content = transform(data, base_path=self.BASE_PATH)
+            fout.write(new_content)
+
+        #fin = open(source, 'r')
+        #new_content = transform(fin.read(), base_path=self.BASE_PATH)
+        #now = datetime.datetime.now()
+        #cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'
+        #fout = open('/opt/cloudmapper/' + cloudmapper_filename, 'w+')
+        #fout.write(new_content)
+        #fin.close()
+        #fout.close()
 
         # Hack to fix Javascript Pop up Chart backgrounds
         # For some reason, premailer has a hard time evaluating the CSS on JS componenets

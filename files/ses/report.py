@@ -65,24 +65,49 @@ class Report():
 
         subject = '[cloudmapper ' + self.account_name + '] Cloudmapper audit findings'
         body_text = "Please see the attached file for cloudmapper results."
-        #body_html = """\
-#<html>
-#<head></head>
-#<body>
-#<p>Please see the attached file for cloudmapper results.</p>
-#</body>
-#</html>
-#"""
+
+        # Inject JS file contents into HTML
+        self.js_replace(self.report_source)
 
         # Run premailer transformation to inject CSS data directly in HTML
         # https://pypi.org/project/premailer/
         out_file = self.premailer_transform(self.report_source)
 
-        body_html = out_file
+        with open(out_file, 'r') as html:
+            body_html = html.read()
 
         attachments = [out_file]
 
         self.ses.send_email(self.sender, self.recipient, subject, body_text, body_html, attachments)
+
+    def js_replace(self, source):
+        """
+        Replaces js source file tags with js file contents.
+        This allows the html to contain all data needed for the report
+        with no additional links, etc.
+        
+        :param source: Filepath to report.html
+        :type source: str
+        """
+
+        html = open(source, 'r')
+        html_data = html.read()
+        html.close()
+
+        chart_js = open('/opt/cloudmapper/web/js/chart.js', 'r')
+        chart_js_data = chart_js.read()
+        chart_js.close()
+
+        report_js = open('/opt/cloudmapper/web/js/report.js', 'r')
+        report_js_data = report_js.read()
+        report_js.close()
+
+        new_html_data = html_data.replace('<script src="../js/chart.js"></script>', '<script>' + chart_js_data + '</script>')
+        new_html_data = new_html_data.replace('<script src="../js/report.js"></script>', '<script>' + report_js_data + '</script>')
+
+        new_html = open(source, 'w')
+        new_html.write(new_html_data)
+        new_html.close()
 
     def premailer_transform(self, source):
         """Runs premailer transformation on an html source file.
@@ -104,25 +129,6 @@ class Report():
         #with open('/opt/cloudmapper/web/js/chart.js', 'r') as chart_js:
         #    chart_js_data = chart_js.read()
 
-        html = open(source, 'r')
-        html_data = html.read()
-        html.close()
-
-        chart_js = open('/opt/cloudmapper/web/js/chart.js', 'r')
-        chart_js_data = chart_js.read()
-        chart_js.close()
-
-        report_js = open('/opt/cloudmapper/web/js/report.js', 'r')
-        report_js_data = report_js.read()
-        report_js.close()
-
-        new_html_data = html_data.replace('<script src="../js/chart.js"></script>', chart_js_data)
-        new_html_data = new_html_data.replace('<script src="../js/report.js"></script>', report_js_data)
-
-        new_html = open(source, 'w')
-        new_html.write(new_html_data)
-        new_html.close()
-
         now = datetime.datetime.now()
         cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'
 
@@ -131,16 +137,7 @@ class Report():
             new_content = transform(data, base_path=self.BASE_PATH)
             fout.write(new_content)
 
-        #fin = open(source, 'r')
-        #new_content = transform(fin.read(), base_path=self.BASE_PATH)
-        #now = datetime.datetime.now()
-        #cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'
-        #fout = open('/opt/cloudmapper/' + cloudmapper_filename, 'w+')
-        #fout.write(new_content)
-        #fin.close()
-        #fout.close()
-
-        # Hack to fix Javascript Pop up Chart backgrounds
+        # Fix Javascript Pop up Chart backgrounds
         # For some reason, premailer has a hard time evaluating the CSS on JS componenets
         additional_css = """
     .mytooltip:hover .tooltiptext {visibility:visible}

@@ -79,7 +79,7 @@ class Report():
         out_file = self.premailer_transform(self.report_source)
 
         body_html = out_file
-        
+
         attachments = [out_file]
 
         self.ses.send_email(self.sender, self.recipient, subject, body_text, body_html, attachments)
@@ -103,11 +103,15 @@ class Report():
 
         with open('/opt/cloudmapper/web/js/chart.js', 'r') as chart_js:
             data = chart_js.read()
-            self.sed('<script src="../js/chart.js"></script>', '<script>' + data + '</script>', source)
+            js = '<script>' + data + '</script>'
+            raw_js = r"{}".format(js)
+            self.sed('<script src="../js/chart.js"></script>', raw_js, source)
         
         with open('/opt/cloudmapper/web/js/report.js', 'r') as report_js:
             data = report_js.read()
-            self.sed('<script src="../js/report.js"></script>','<script>' + data + '</script>', source)
+            js = '<script>' + data + '</script>'
+            raw_js = r"{}".format(js)
+            self.sed('<script src="../js/report.js"></script>', raw_js, source)
 
         now = datetime.datetime.now()
         cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'

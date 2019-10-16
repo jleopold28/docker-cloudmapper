@@ -101,17 +101,27 @@ class Report():
         #self.sed('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js', source)
         #self.sed('../favicon.ico','https://raw.githubusercontent.com/duo-labs/cloudmapper/master/web/favicon.ico', source)
 
-        with open('/opt/cloudmapper/web/js/chart.js', 'r') as chart_js:
-            data = chart_js.read()
-            js = '<script>' + data + '</script>'
-            raw_js = r"{}".format(js)
-            self.sed('<script src="../js/chart.js"></script>', raw_js, source)
-        
-        with open('/opt/cloudmapper/web/js/report.js', 'r') as report_js:
-            data = report_js.read()
-            js = '<script>' + data + '</script>'
-            raw_js = r"{}".format(js)
-            self.sed('<script src="../js/report.js"></script>', raw_js, source)
+        #with open('/opt/cloudmapper/web/js/chart.js', 'r') as chart_js:
+        #    chart_js_data = chart_js.read()
+
+        html = open(source, 'r')
+        html_data = html.read()
+        html.close()
+
+        chart_js = open('/opt/cloudmapper/web/js/chart.js', 'r')
+        chart_js_data = chart_js.read()
+        chart_js.close()
+
+        report_js = open('/opt/cloudmapper/web/js/report.js', 'r')
+        report_js_data = report_js.read()
+        report_js.close()
+
+        new_html_data = html_data.replace('<script src="../js/chart.js"></script>', chart_js_data)
+        new_html_data = new_html_data.replace('<script src="../js/report.js"></script>', report_js_data)
+
+        new_html = open(source, 'w')
+        new_html.write(new_html_data)
+        new_html.close()
 
         now = datetime.datetime.now()
         cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'

@@ -28,6 +28,23 @@ class SES():
         self.client = boto3.client('ses',region_name=region)
 
     def send_email(self, sender, recipient, subject, body_text, body_html, attachments):
+        """
+        Send a raw email using AWS SES
+
+        :param sender: From address
+        :type sender: str
+        :param recipient: To Address
+        :type recipiend: str
+        :param subject: Email subject
+        :type subject: str
+        :param body_text: Email Body Text (displayed in clients that do not support html emails)
+        :type body_text: str
+        :param body_html: HTML comtents of the email
+        :type body_html: str
+        :param attachments: Attachments for the email
+        :type attachments: list
+        """
+
         # Create a multipart/mixed parent container.
         msg = MIMEMultipart('mixed')
         # Add subject, from and to lines.

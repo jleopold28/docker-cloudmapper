@@ -16,12 +16,6 @@ pipenv run python cloudmapper.py collect --account $ACCOUNT
 echo "Running cloudmapper.py report on $ACCOUNT"
 pipenv run python cloudmapper.py report --account $ACCOUNT
 
-#echo "Running cloudmapper.py audit on $ACCOUNT"
-#pipenv run python cloudmapper.py audit --account $ACCOUNT --json > audit-json-lines
-#awk 'BEGIN {print "{\"audit_findings\": ["} { if (NR>1) { print str",";} str=$0;} END { print str"]}";}' audit-json-lines > $ACCOUNT-audit.json
-#echo "Audit results: "
-#cat $ACCOUNT-audit.json
-
 echo "Running cloudmapper.py public scan on $ACCOUNT"
 pipenv run python cloudmapper.py public --account $ACCOUNT > $ACCOUNT.json
 

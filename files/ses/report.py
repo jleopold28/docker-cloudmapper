@@ -70,14 +70,15 @@ class Report():
         self.js_replace(self.report_source)
 
         # Run premailer transformation to inject CSS data directly in HTML
-        # https://pypi.org/project/premailer/
         out_file = self.premailer_transform(self.report_source)
+
+        # Fix CSS post-premailer
+        self.css_js_fix(out_file)
 
         with open(out_file, 'r') as html:
             body_html = html.read()
 
         attachments = [out_file]
-
         self.ses.send_email(self.sender, self.recipient, subject, body_text, body_html, attachments)
 
     def js_replace(self, source):
@@ -85,7 +86,7 @@ class Report():
         Replaces js source file tags with js file contents.
         This allows the html to contain all data needed for the report
         with no additional links, etc.
-        
+
         :param source: Filepath to report.html
         :type source: str
         """
@@ -108,26 +109,44 @@ class Report():
         new_html = open(source, 'w')
         new_html.write(new_html_data)
         new_html.close()
+    
+    def css_js_fix(self, source):
+        """
+        Adds additional CSS to support formatting of JS tables
+        Premailer has a hard time evaluating the CSS on JS componenets
+        This fixes the background on js pop-up tables.
+
+        :param source: Filepath to report.html
+        :type source: str
+        """
+
+        html = open(source, 'r')
+        html_data = html.read()
+        html.close()
+
+        additional_css = """
+    .mytooltip:hover .tooltiptext {visibility:visible}
+    #chartjs-tooltip td {background-color: #fff}
+    #chartjs-tooltip table {box-shadow: 5px 10px 8px #888888}
+    table {border-collapse:collapse;}
+    table, td, th {border:1px solid black; padding: 1px;}
+    th {background-color: #ddd; text-align: center;}"""
+
+        new_html_data = html_data.replace('.mytooltip:hover .tooltiptext {visibility:visible}', additional_css)
+
+        new_html = open(source, 'w')
+        new_html.write(new_html_data)
+        new_html.close()
+
 
     def premailer_transform(self, source):
-        """Runs premailer transformation on an html source file.
-
-        First use sed commands to change javascript file src
+        """
+        Runs premailer transformation on an html source file.
         A new HTML file with CSS injections is created
 
         :param source: Filepath to report.html
         :type source: str
         """
-        
-        # Replace the js script source with raw github content
-        # Content is served via jsdelivr CDN (https://www.jsdelivr.com/)
-        # Raw github files do not have correct js headers
-        #self.sed('../js/chart.js', 'https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/chart.js', source)
-        #self.sed('../js/report.js','https://cdn.jsdelivr.net/gh/duo-labs/cloudmapper@master/web/js/report.js', source)
-        #self.sed('../favicon.ico','https://raw.githubusercontent.com/duo-labs/cloudmapper/master/web/favicon.ico', source)
-
-        #with open('/opt/cloudmapper/web/js/chart.js', 'r') as chart_js:
-        #    chart_js_data = chart_js.read()
 
         now = datetime.datetime.now()
         cloudmapper_filename = 'cloudmapper_report_' + str(now.year) + '-' + str(now.month) + '-' + str(now.day) + '.html'
@@ -137,50 +156,4 @@ class Report():
             new_content = transform(data, base_path=self.BASE_PATH)
             fout.write(new_content)
 
-        # Fix Javascript Pop up Chart backgrounds
-        # For some reason, premailer has a hard time evaluating the CSS on JS componenets
-        additional_css = """
-    .mytooltip:hover .tooltiptext {visibility:visible}
-    #chartjs-tooltip td {background-color: #fff}
-    #chartjs-tooltip table {box-shadow: 5px 10px 8px #888888}
-    table {border-collapse:collapse;}
-    table, td, th {border:1px solid black; padding: 1px;}
-    th {background-color: #ddd; text-align: center;}"""
-
-        self.sed('.mytooltip:hover .tooltiptext {visibility:visible}', additional_css, cloudmapper_filename)
-
         return cloudmapper_filename
-    
-    def sed(self, pattern, replace, source, dest=None):
-        """Reads a source file and writes the destination file.
-
-        In each line, replaces pattern with replace.
-
-        Args:
-            pattern (str): pattern to match (can be re.pattern)
-            replace (str): replacement str
-            source  (str): input filename
-            dest (str): destination filename, if not given, source will be over written.        
-        """
-
-        fin = open(source, 'r')
-        if dest:
-            fout = open(dest, 'w')
-        else:
-            fd, name = mkstemp()
-            fout = open(name, 'w')
-        
-        for line in fin:
-            out = re.sub(pattern, replace, line)
-            fout.write(out)
-
-        try:
-            fout.writelines(fin.readlines())
-        except Exception as E:
-            raise E
-
-        fin.close()
-        fout.close()
-
-        if not dest:
-            shutil.move(name, source)

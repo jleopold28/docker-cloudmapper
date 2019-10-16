@@ -48,40 +48,10 @@ class PortCheck():
                 bad_ports.append(port)
         return bad_ports
 
-    def test_each_port(self, host, ports):
-        """
-        Test each port to see if it can be accessed.
-
-        :param host: Host to connect to
-        :type host: str
-        :param ports: Ports on host
-        :type ports: list
-        """
-        bad_ports = []
-        for port in ports:
-            if "-" in port:
-                bad_ports.append(port)
-                continue
-
-            cmd = ['nc','-w','1','-vz',host,port]
-
-            pipes = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            std_out, std_err = pipes.communicate()
-
-            if pipes.returncode != 0:
-                # connection refused means the port is defined, but no process is listening
-                # and that is bad...
-                if 'refused' not in std_err:
-                    continue
-            bad_ports.append(port)
-
-        return bad_ports
-
     def check_ports(self):
         """
         Check which ports are publicly accesible.
         Read the account.json file and parse through the open ports.
-        Test each port with the test_each_port function.
 
         Alert PagerDuty if any publicly accesible ports are not
         in the list of acceptable ports.
@@ -108,12 +78,10 @@ class PortCheck():
                     hostname = line[2]
                     port_list = line[3]
                     arn = line[4]
-                    #print "%s,%s,%s,%s,%s" % (account,aws_type,hostname,port_list,arn)
                 
                     ports = port_list.split(',')
                 
                     bad_ports = self.get_bad_ports(ports)
-                    bad_ports = self.test_each_port(hostname, bad_ports)
                     bad_ports = ",".join(bad_ports)
                 
                     if bad_ports:
